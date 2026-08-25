@@ -14,7 +14,7 @@ model = PPO(
     seed=42,
 )
 
-model.learn(total_timesteps=10_000)
+model.learn(total_timesteps=100_000)
 
 model.save("ppo_platformer")
 
