@@ -35,7 +35,9 @@ class PlatformerEnv(gym.Env):
         # 1 = left
         # 2 = right
         # 3 = jump
-        self.action_space = spaces.Discrete(4)
+        # 4 = right + jump
+        # 5 = left + jump
+        self.action_space = spaces.Discrete(6)
 
         # Observation:
         #
@@ -139,14 +141,22 @@ class PlatformerEnv(gym.Env):
             "right": False,
             "jump": False,
         }
-
+        
         if action == 1:
             act["left"] = True
-
+        
         elif action == 2:
             act["right"] = True
-
+        
         elif action == 3:
+            act["jump"] = True
+        
+        elif action == 4:
+            act["right"] = True
+            act["jump"] = True
+        
+        elif action == 5:
+            act["left"] = True
             act["jump"] = True
 
         # Advance game simulation.
