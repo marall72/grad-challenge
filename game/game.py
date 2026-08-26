@@ -28,6 +28,7 @@ class Game:
         self.player: Optional[Player] = None
         self.state = GameState.RUNNING
         self.time = 0.0
+        self.death_reason = None
         self.reset(seed=seed)
 
     def reset(self, seed: Optional[int] = None) -> None:
@@ -41,6 +42,7 @@ class Game:
         self.player = Player(x=sx, y=sy, w=self.config.player_width, h=self.config.player_height, config=self.config)
         self.state = GameState.RUNNING
         self.time = 0.0
+        self.death_reason = None
 
     def step(self, action: Optional[Dict[str, bool]] = None, dt: Optional[float] = None) -> GameState:
         """Advance simulation by dt seconds applying the given action.
@@ -76,6 +78,7 @@ class Game:
             hx, hy, hw, hh = h.bounds()
             if not (px + pw <= hx or px >= hx + hw or py + ph <= hy or py >= hy + hh):
                 self.state = GameState.DEAD
+                self.death_reason = "HAZARD"
                 return self.state
 
         # check collisions with enemies (simple bounding box)
@@ -84,6 +87,7 @@ class Game:
             if not (px + pw <= ex or px >= ex + ew or py + ph <= ey or py >= ey + eh):
                 # simple rule: touching enemy kills the player
                 self.state = GameState.DEAD
+                self.death_reason = "ENEMY"
                 return self.state
 
         # check goal
