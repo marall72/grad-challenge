@@ -39,7 +39,14 @@ class Game:
         # Build level deterministically from seed
         self.level = Level.sample(self._seed)
         sx, sy = self.level.pick_spawn()
-        self.player = Player(x=sx, y=sy, w=self.config.player_width, h=self.config.player_height, config=self.config)
+        self.player = Player(
+            x=sx,
+            y=sy,
+            w=self.config.player_width,
+            h=self.config.player_height,
+            grounded=True,
+            config=self.config
+        )
         self.state = GameState.RUNNING
         self.time = 0.0
         self.death_reason = None

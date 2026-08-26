@@ -31,7 +31,7 @@ for episode in range(NUM_EPISODES):
     while True:
         action, _ = model.predict(
             obs,
-            deterministic=False,
+            deterministic=True,
         )
 
         obs, reward, terminated, truncated, info = env.step(action)
