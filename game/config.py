@@ -12,6 +12,7 @@ class GameConfig:
     player_width: int = 32
     player_height: int = 48
     time_step: float = 1.0 / 60.0
+    seed: int = 42
 
 
 DEFAULT_CONFIG = GameConfig()

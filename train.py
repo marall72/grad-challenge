@@ -2,7 +2,7 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.monitor import Monitor
 
 from game.environment import PlatformerEnv
-
+from game.config import DEFAULT_CONFIG, GameConfig
 
 # ============================================================
 # SETTINGS
@@ -12,9 +12,12 @@ TOTAL_TIMESTEPS = 100_000
 
 MAX_EPISODE_STEPS = 1000
 
-SEED = 42
+SEED = DEFAULT_CONFIG.seed
 
 MODEL_NAME = "ppo_platformer"
+
+LOG_DIR = "./logs/"
+TB_LOG_NAME = "PPO_Platformer"
 
 
 # ============================================================
@@ -60,7 +63,9 @@ model = PPO(
 
     # Logging
     verbose=1,
+    tensorboard_log=LOG_DIR,
 
+    # Reproducibility
     seed=SEED,
 )
 
@@ -76,6 +81,7 @@ print("=" * 70)
 print(f"Timesteps:          {TOTAL_TIMESTEPS:,}")
 print(f"Max episode steps:  {MAX_EPISODE_STEPS}")
 print(f"Seed:               {SEED}")
+print(f"TensorBoard logs:   {LOG_DIR}")
 print("=" * 70)
 print()
 
@@ -83,6 +89,7 @@ print()
 model.learn(
     total_timesteps=TOTAL_TIMESTEPS,
     progress_bar=True,
+    tb_log_name=TB_LOG_NAME,
 )
 
 
@@ -96,7 +103,8 @@ print()
 print("=" * 70)
 print("Training finished")
 print("=" * 70)
-print(f"Model saved as: {MODEL_NAME}.zip")
+print(f"Model saved as:     {MODEL_NAME}.zip")
+print(f"TensorBoard logs:   {LOG_DIR}")
 print("=" * 70)
 
 

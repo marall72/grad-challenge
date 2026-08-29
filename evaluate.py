@@ -2,9 +2,9 @@ from stable_baselines3 import PPO
 
 from game.environment import PlatformerEnv
 from game.game import GameState
+from game.config import DEFAULT_CONFIG, GameConfig
 
-
-NUM_EPISODES = 10
+NUM_EPISODES = 100
 MAX_EPISODE_STEPS = 1000
 
 
@@ -14,7 +14,7 @@ MAX_EPISODE_STEPS = 1000
 
 env = PlatformerEnv(
     max_episode_steps=MAX_EPISODE_STEPS,
-    seed=42,
+    seed=DEFAULT_CONFIG.seed,
 )
 
 
@@ -37,7 +37,7 @@ results = []
 
 for episode in range(NUM_EPISODES):
 
-    obs, info = env.reset(seed=42)
+    obs, info = env.reset(seed=DEFAULT_CONFIG.seed)
 
     total_reward = 0.0
     steps = 0

@@ -4,3 +4,4 @@ numpy>=1.21
 stable-baselines3>=2.0
 tqdm>=4.0
 rich>=13.0
+tensorboard>=2.0

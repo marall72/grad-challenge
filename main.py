@@ -1,7 +1,7 @@
 import pygame
 
 from game.game import Game
-
+from game.config import DEFAULT_CONFIG, GameConfig
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
@@ -26,7 +26,7 @@ def main():
 
     clock = pygame.time.Clock()
 
-    game = Game(seed=42)
+    game = Game(seed=DEFAULT_CONFIG.seed)
 
     running = True
 

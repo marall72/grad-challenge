@@ -5,6 +5,7 @@ from stable_baselines3 import PPO
 
 from game.environment import PlatformerEnv
 from game.game import GameState
+from game.config import DEFAULT_CONFIG, GameConfig
 
 
 # ============================================================
@@ -33,7 +34,7 @@ CAMERA_OFFSET_X = 250
 
 env = PlatformerEnv(
     max_episode_steps=MAX_EPISODE_STEPS,
-    seed=42,
+    seed=40,
 )
 
 model = PPO.load(
@@ -73,7 +74,7 @@ results = []
 
 for episode in range(NUM_EPISODES):
 
-    obs, info = env.reset(seed=42)
+    obs, info = env.reset(seed=DEFAULT_CONFIG.seed)
 
     total_reward = 0.0
     steps = 0

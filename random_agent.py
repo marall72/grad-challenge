@@ -1,7 +1,7 @@
 from game.environment import PlatformerEnv
+from game.config import DEFAULT_CONFIG, GameConfig
 
-
-def run_episode(seed=42, max_steps=1000):
+def run_episode(seed=DEFAULT_CONFIG.seed, max_steps=1000):
     env = PlatformerEnv(
         max_episode_steps=max_steps,
         seed=seed
@@ -44,7 +44,7 @@ def run_episode(seed=42, max_steps=1000):
 
 
 if __name__ == "__main__":
-    result = run_episode(seed=42)
+    result = run_episode(seed=DEFAULT_CONFIG.seed)
 
     print("Random Agent Result")
     print("-------------------")
