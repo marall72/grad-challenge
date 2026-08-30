@@ -100,9 +100,9 @@ project/
 ├── evaluate_with_head.py                      # Evaluation with rendering
 ├── main.py                                    # Manual game
 ├── ppo_platformer.zip                         # Successful training model
-├── ppo_platformer_no_enemy_observation.zip   # Model without enemy observations
-├── ppo_platformer_no_hazard_reward.zip       # Model without hazard-specific rewards
-├── ppo_platformer_no_movement_reward.zip     # Model without movement rewards
+├── ppo_platformer_no_enemy_observation.zip    # Model without enemy observations
+├── ppo_platformer_no_hazard_reward.zip        # Model without hazard-specific rewards
+├── ppo_platformer_no_movement_reward.zip      # Model without movement rewards
 ├── random_agent.py                            # Untrained random agent
 ├── README.md
 ├── requirements.txt
