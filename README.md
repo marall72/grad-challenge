@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/marall72/grad-challenge/refs/heads/master/cover.png" />
+</p>
+
 # Running the Project
 
 Open PowerShell and navigate to the project directory.
