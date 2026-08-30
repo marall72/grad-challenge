@@ -1,3 +1,5 @@
+from email.policy import default
+
 import pygame
 from collections import Counter
 
@@ -14,7 +16,13 @@ from game.config import DEFAULT_CONFIG, GameConfig
 
 NUM_EPISODES = 1
 MAX_EPISODE_STEPS = 1000
-
+MODEL_NAME = "ppo_platformer"
+if not (DEFAULT_CONFIG.use_hazard_reward):
+    MODEL_NAME = "ppo_platformer_no_hazard_reward"
+elif not(DEFAULT_CONFIG.use_enemy_observation):
+    MODEL_NAME = "ppo_platformer_no_enemy_observation"
+elif not(DEFAULT_CONFIG.use_movement_reward):
+    MODEL_NAME = "ppo_platformer_no_movement_reward"
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 500
 
@@ -34,11 +42,11 @@ CAMERA_OFFSET_X = 250
 
 env = PlatformerEnv(
     max_episode_steps=MAX_EPISODE_STEPS,
-    seed=40,
+    seed=DEFAULT_CONFIG.seed,
 )
 
 model = PPO.load(
-    "ppo_platformer",
+    MODEL_NAME,
     env=env,
 )
 

@@ -14,5 +14,10 @@ class GameConfig:
     time_step: float = 1.0 / 60.0
     seed: int = 42
 
+    # Ablation settings
+    use_hazard_reward: bool = True
+    use_enemy_observation: bool = True
+    use_movement_reward: bool = True
+
 
 DEFAULT_CONFIG = GameConfig()

@@ -1,0 +1,2 @@
+agent,episodes,successes,deaths,timeouts,success_rate,death_rate,timeout_rate,average_steps,average_reward
+Random,100,0,52,48,0.00,52.00,48.00,730.97,-58.489042

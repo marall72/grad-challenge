@@ -1,0 +1,2 @@
+agent,model,episodes,successes,deaths,timeouts,success_rate,death_rate,timeout_rate,average_steps,average_reward
+PPO,ppo_platformer_no_enemy_observation,100,0,0,100,0.00,0.00,100.00,1000.00,151.543333

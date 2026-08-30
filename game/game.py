@@ -103,6 +103,12 @@ class Game:
             self.level.platforms,
         )
 
+        # Keep player inside the level boundaries
+        self.player.x = max(
+            0.0,
+            self.player.x,
+        )
+
         # ---------------------------------------------------------
         # Hazard collision
         # ---------------------------------------------------------

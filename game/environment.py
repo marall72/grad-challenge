@@ -8,6 +8,8 @@ import gymnasium as gym
 import numpy as np
 from gymnasium import spaces
 
+from game.config import DEFAULT_CONFIG
+
 from .game import Game, GameState
 
 
@@ -72,8 +74,7 @@ class PlatformerEnv(gym.Env):
         # 20 horizontal distance to enemy
         #
 
-        low = np.array(
-            [
+        low = [
                 0.0,       # player x
                 -1000.0,   # player y
                 -2000.0,   # player vx
@@ -82,9 +83,6 @@ class PlatformerEnv(gym.Env):
 
                 -5000.0,   # goal relative x
                 -5000.0,   # goal relative y
-
-                -5000.0,   # enemy relative x
-                -5000.0,   # enemy relative y
 
                 -5000.0,   # hazard relative x
                 -5000.0,   # hazard relative y
@@ -97,24 +95,14 @@ class PlatformerEnv(gym.Env):
                 -5000.0,   # hazard left
                 -5000.0,   # hazard right
                 0.0,       # hazard horizontal distance
+            ]
 
-                -5000.0,   # enemy left
-                -5000.0,   # enemy right
-                0.0,       # enemy horizontal distance
-            ],
-            dtype=np.float32,
-        )
-
-        high = np.array(
-            [
+        high = [
                 5000.0,
                 2000.0,
                 2000.0,
                 2000.0,
                 1.0,
-
-                5000.0,
-                5000.0,
 
                 5000.0,
                 5000.0,
@@ -130,17 +118,28 @@ class PlatformerEnv(gym.Env):
                 5000.0,
                 5000.0,
                 5000.0,
+            ]
 
-                5000.0,
-                5000.0,
-                5000.0,
-            ],
-            dtype=np.float32,
-        )
+        if DEFAULT_CONFIG.use_enemy_observation:
+            low.extend([
+                -5000.0,   # enemy relative x
+                -5000.0,   # enemy relative y
+                -5000.0,   # enemy left
+                -5000.0,   # enemy right
+                0.0,       # enemy horizontal distance
+            ])
+
+            high.extend([
+                5000.0,   # enemy relative x
+                5000.0,   # enemy relative y
+                5000.0,    # enemy left
+                5000.0,    # enemy right
+                5000.0,    # enemy horizontal distance
+            ])
 
         self.observation_space = spaces.Box(
-            low=low,
-            high=high,
+            low=np.array(low, dtype=np.float32),
+            high=np.array(high, dtype=np.float32),
             dtype=np.float32,
         )
 
@@ -292,35 +291,32 @@ class PlatformerEnv(gym.Env):
 
             dx = current_x - previous_x
 
-            # =====================================================
-            # 1. REAL HORIZONTAL MOVEMENT
-            # =====================================================
+            if (DEFAULT_CONFIG.use_movement_reward):
+                # =====================================================
+                # 1. REAL HORIZONTAL MOVEMENT
+                # =====================================================
+                #is moving right
+                if dx > 0.0:
 
-            if dx > 0.0:
+                    reward += min(
+                        dx * 0.035,
+                        0.40,
+                    )
 
-                reward += min(
-                    dx * 0.025,
-                    0.30,
-                )
+                #is standing still
+                elif dx == 0:
+                    reward -= 1
 
-            elif dx == 0:
+                #moved backwards
+                elif dx < 0.0:
+                    reward -= min(
+                        abs(dx) * 0.040,
+                        0.55,
+                    )
 
-                reward -= 0.3
-
-            elif dx < 0.0:
-
-                reward -= min(
-                    abs(dx) * 0.040,
-                    0.35,
-                )
-
-            # =====================================================
-            # 2. RIGHT + JUMP
-            # =====================================================
-
-            if action == 4 and dx > 0.0:
-
-                reward += 0.025
+                #did right jump
+                if action == 4 and dx > 0.0:
+                    reward += 0.035
 
             # =====================================================
             # 3. GOAL PROGRESS
@@ -342,134 +338,133 @@ class PlatformerEnv(gym.Env):
             # =====================================================
             # 4. HAZARD HANDLING
             # =====================================================
-
             player_left = float(p.x)
             player_right = float(p.x + p.w)
-
-            for index, hazard in enumerate(
-                self.game.level.hazards
-            ):
-
-                if index in self._passed_hazards:
-                    continue
-
-                hx, hy, hw, hh = hazard.bounds()
-
-                hazard_left = float(hx)
-                hazard_right = float(hx + hw)
-
-                distance_to_hazard = (
-                    hazard_left - player_right
-                )
-
-                player_over_hazard = (
-                    player_right > hazard_left
-                    and player_left < hazard_right
-                )
-
-                completely_past_hazard = (
-                    player_left > hazard_right
-                )
-
-                # -------------------------------------------------
-                # Hazard attempt
-                # -------------------------------------------------
-
-                if (
-                    distance_to_hazard >= 0.0
-                    and distance_to_hazard <= 160.0
+            if(DEFAULT_CONFIG.use_hazard_reward):
+                for index, hazard in enumerate(
+                    self.game.level.hazards
                 ):
 
-                    self._hazard_attempted.add(index)
+                    if index in self._passed_hazards:
+                        continue
+
+                    hx, hy, hw, hh = hazard.bounds()
+
+                    hazard_left = float(hx)
+                    hazard_right = float(hx + hw)
+
+                    distance_to_hazard = (
+                        hazard_left - player_right
+                    )
+
+                    player_over_hazard = (
+                        player_right > hazard_left
+                        and player_left < hazard_right
+                    )
+
+                    completely_past_hazard = (
+                        player_left > hazard_right
+                    )
+
+                    # -------------------------------------------------
+                    # Hazard attempt
+                    # -------------------------------------------------
+
+                    if (
+                        distance_to_hazard >= 0.0
+                        and distance_to_hazard <= 160.0
+                    ):
+
+                        self._hazard_attempted.add(index)
 
                 # -------------------------------------------------
                 # Approaching hazard
                 # -------------------------------------------------
 
-                if index in self._hazard_attempted:
+                    if index in self._hazard_attempted:
+
+                        if (
+                            distance_to_hazard > 0.0
+                            and dx > 0.0
+                        ):
+
+                            reward += min(
+                                dx * 0.02,
+                                0.2,
+                            )
+
+                        if (
+                            distance_to_hazard > 0.0
+                            and dx < 0.0
+                        ):
+
+                            reward -= min(
+                                abs(dx) * 0.045,
+                                0.40,
+                            )
+
+                    # -------------------------------------------------
+                    # Jumping above hazard
+                    # -------------------------------------------------
 
                     if (
-                        distance_to_hazard > 0.0
-                        and dx > 0.0
+                        index in self._hazard_attempted
+                        and player_over_hazard
+                        and not p.grounded
                     ):
 
-                        reward += min(
-                            dx * 0.018,
-                            0.18,
+                        crossing_key = (
+                            index,
+                            "airborne",
                         )
 
+                        if crossing_key not in self._passed_hazards:
+
+                            reward += 0.2
+
+                    # -------------------------------------------------
+                    # Successful crossing
+                    # -------------------------------------------------
+
+                    if completely_past_hazard:
+
+                        self._passed_hazards.add(index)
+
+                        reward += 36.0
+
+                    # -------------------------------------------------
+                    # Do not turn around above hazard
+                    # -------------------------------------------------
+
                     if (
-                        distance_to_hazard > 0.0
+                        index in self._hazard_attempted
+                        and player_over_hazard
+                        and not p.grounded
                         and dx < 0.0
                     ):
 
-                        reward -= min(
-                            abs(dx) * 0.045,
-                            0.40,
-                        )
+                        reward -= abs(dx) * 0.060
 
-                # -------------------------------------------------
-                # Jumping above hazard
-                # -------------------------------------------------
+                    # -------------------------------------------------
+                    # Standing immediately before hazard
+                    # -------------------------------------------------
 
-                if (
-                    index in self._hazard_attempted
-                    and player_over_hazard
-                    and not p.grounded
-                ):
+                    if (
+                        p.grounded
+                        and 0.0 <= distance_to_hazard <= 70.0
+                    ):
 
-                    crossing_key = (
-                        index,
-                        "airborne",
-                    )
+                        reward -= 0.08
 
-                    if crossing_key not in self._passed_hazards:
+                    # -------------------------------------------------
+                    # Encourage RIGHT + JUMP near hazard
+                    # -------------------------------------------------
 
-                        reward += 0.2
+                    if (
+                        action == 4 and distance_to_hazard <= 70.0
+                    ):
 
-                # -------------------------------------------------
-                # Successful crossing
-                # -------------------------------------------------
-
-                if completely_past_hazard:
-
-                    self._passed_hazards.add(index)
-
-                    reward += 35.0
-
-                # -------------------------------------------------
-                # Do not turn around above hazard
-                # -------------------------------------------------
-
-                if (
-                    index in self._hazard_attempted
-                    and player_over_hazard
-                    and not p.grounded
-                    and dx < 0.0
-                ):
-
-                    reward -= abs(dx) * 0.060
-
-                # -------------------------------------------------
-                # Standing immediately before hazard
-                # -------------------------------------------------
-
-                if (
-                    p.grounded
-                    and 0.0 <= distance_to_hazard <= 70.0
-                ):
-
-                    reward -= 0.08
-
-                # -------------------------------------------------
-                # Encourage RIGHT + JUMP near hazard
-                # -------------------------------------------------
-
-                if (
-                    action == 4 and distance_to_hazard <= 70.0
-                ):
-
-                    reward += 0.3
+                        reward += 0.3
 
             # =====================================================
             # 5. ENEMY HANDLING
@@ -549,8 +544,8 @@ class PlatformerEnv(gym.Env):
                     # -------------------------------------------------
 
                     if (
-                        0.0 <= distance_to_enemy <= 100.0
-                        and action in (3, 4)
+                        0.0 <= distance_to_enemy <= 70.0
+                        and action == 4
                     ):
 
                         reward += 0.30
@@ -932,8 +927,7 @@ class PlatformerEnv(gym.Env):
         # BUILD OBSERVATION
         # =========================================================
 
-        obs = np.array(
-            [
+        obs = [
                 px,
                 py,
                 pvx,
@@ -942,9 +936,6 @@ class PlatformerEnv(gym.Env):
 
                 goal_rel_x,
                 goal_rel_y,
-
-                enemy_rel_x,
-                enemy_rel_y,
 
                 hazard_rel_x,
                 hazard_rel_y,
@@ -957,13 +948,18 @@ class PlatformerEnv(gym.Env):
                 hazard_left_rel_x,
                 hazard_right_rel_x,
                 horizontal_distance,
+            ]
 
+        if DEFAULT_CONFIG.use_enemy_observation:
+            obs.extend([
+                enemy_rel_x,
+                enemy_rel_y,
                 enemy_left_rel_x,
                 enemy_right_rel_x,
                 enemy_horizontal_distance,
-            ],
-            dtype=np.float32,
-        )
+            ])
+
+        obs = np.array(obs, dtype=np.float32)
 
         return np.clip(
             obs,
